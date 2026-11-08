@@ -183,13 +183,14 @@ private fun MainScaffold(
         playerState.error?.let { snackbarHostState.showSnackbar(it) }
     }
 
+    val authViewModel: AuthViewModel = viewModel(factory = factory)
+    val authState by authViewModel.state.collectAsState()
+    val app = context.applicationContext as XroTuneApp
+
     LaunchedEffect(authState.error) {
         authState.error?.let { snackbarHostState.showSnackbar(it) }
     }
 
-    val authViewModel: AuthViewModel = viewModel(factory = factory)
-    val authState by authViewModel.state.collectAsState()
-    val app = context.applicationContext as XroTuneApp
 
     var likedSongIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     LaunchedEffect(authState.account) {
