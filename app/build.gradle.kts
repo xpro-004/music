@@ -18,7 +18,7 @@ android {
 
         // Google Sign-In: replace with your own OAuth client ID from
         // Google Cloud Console (type: Android, package + SHA-1 registered).
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"REPLACE_WITH_YOUR_WEB_CLIENT_ID.apps.googleusercontent.com\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"598562844511-4lo1c0dop79tpmclgi2fa9n87p2h24l5.apps.googleusercontent.com\"")
     }
 
     signingConfigs {
