@@ -38,6 +38,7 @@ class SessionStore(private val context: Context) {
             putOrRemove(prefs, Keys.name, account.displayName)
             putOrRemove(prefs, Keys.email, account.email)
             putOrRemove(prefs, Keys.photo, account.photoUrl)
+            prefs.remove(Keys.legacyGoogleToken)
             prefs[Keys.guest] = false
         }
     }
