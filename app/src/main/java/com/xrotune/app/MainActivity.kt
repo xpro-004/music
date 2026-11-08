@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        com.xrotune.app.util.configureAppCheck(this, intent)
+        com.xrotune.app.util.configureAppCheck(this)
         enableEdgeToEdge()
         requestNotificationPermissionIfNeeded()
 
