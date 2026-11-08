@@ -20,10 +20,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -265,7 +265,7 @@ fun AiDjScreen(
                                     modifier = Modifier.testTag("save_playlist_button"),
                                 ) {
                                     Icon(
-                                        imageVector = if (savedSuccess) Icons.Filled.Check else Icons.Filled.PlaylistAdd,
+                                        imageVector = if (savedSuccess) Icons.Filled.Check else Icons.AutoMirrored.Filled.PlaylistAdd,
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
                                     )
