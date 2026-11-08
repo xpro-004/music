@@ -21,6 +21,9 @@ secrets.properties
 .env
 .env.*
 
+# Firebase config (per-project, contains API keys)
+google-services.json
+
 # IDE / OS
 .idea/
 *.iml
