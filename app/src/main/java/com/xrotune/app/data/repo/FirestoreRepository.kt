@@ -53,7 +53,7 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                     "displayName" to displayName,
                     "updatedAt" to FieldValue.serverTimestamp(),
                 )
-                if (photoUrl != null) updates["photoUrl"] = photoUrl
+                updates["photoUrl"] = photoUrl ?: FieldValue.delete()
                 docRef.update(updates).await()
             }
         } catch (e: CancellationException) {
