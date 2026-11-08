@@ -38,8 +38,12 @@ class AuthViewModel(
         viewModelScope.launch {
             try {
                 val restored = resolveAuthSession(authManager.currentAccount(), sessionStore.isGuest.first())
-                if (restored.account != null) sessionStore.save(restored.account)
-                else sessionStore.clearAccount()
+                if (restored.account != null) {
+                    sessionStore.save(restored.account)
+                    syncProfile(restored.account)
+                } else {
+                    sessionStore.clearAccount()
+                }
                 _state.value = AuthUiState(
                     account = restored.account,
                     isGuest = restored.isGuest,
@@ -63,13 +67,7 @@ class AuthViewModel(
                         sessionStore.save(result.account)
                         _state.value = _state.value.copy(account = result.account, isGuest = false)
                         try {
-                            val email = result.account.email?.takeIf(String::isNotBlank)
-                                ?: throw IllegalStateException("Google did not provide an email address.")
-                            firestoreRepository.saveUserProfile(
-                                displayName = result.account.displayName?.takeIf(String::isNotBlank) ?: "XroTune User",
-                                email = email,
-                                photoUrl = result.account.photoUrl,
-                            )
+                            syncProfile(result.account)
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
@@ -89,6 +87,16 @@ class AuthViewModel(
                 _state.value = _state.value.copy(signingIn = false)
             }
         }
+    }
+
+    private suspend fun syncProfile(account: UserAccount) {
+        val email = account.email?.takeIf(String::isNotBlank)
+            ?: throw IllegalStateException("Google did not provide an email address.")
+        firestoreRepository.saveUserProfile(
+            displayName = account.displayName?.takeIf(String::isNotBlank) ?: "XroTune User",
+            email = email,
+            photoUrl = account.photoUrl,
+        )
     }
 
     fun continueAsGuest() {
