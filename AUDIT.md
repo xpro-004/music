@@ -2,8 +2,8 @@
 
 Audit date: 2026-11-08
 Repository: https://github.com/xpro-004/music
-Audited branch: `xrotune-android-app`
-Audited HEAD: `cca9f684654b0b79e18575377bee5a4b1fb2d299`
+Audited branch: `audit/app-check-play-integrity`
+Source review baseline: `cca9f684654b0b79e18575377bee5a4b1fb2d299`
 
 ## Scope and confidence
 
@@ -262,3 +262,30 @@ Before merging, run:
 
 Then validate App Check in Firebase Console with the real release signing
 certificate before enabling enforcement.
+
+
+## Follow-up implementation on audit branch
+
+The following source-level fixes were added after the original audit findings:
+
+### Authentication/session fixes
+
+- Credential Manager is now created with the foreground Activity and called from the ViewModel's main coroutine rather than wrapping UI interaction in an IO dispatcher.
+- A sign-in result is successful only when Firebase Authentication returns a non-null Firebase user; Google profile IDs are never substituted for Firebase UIDs.
+- FirebaseAuth.currentUser is the authority for restoring an authenticated session. Cached DataStore account metadata alone cannot create a signed-in state.
+- Guest mode is persisted; switching to guest clears stale cached account metadata.
+- Google ID tokens were removed from UserAccount and DataStore. Firebase Auth manages its own credentials.
+- Firestore profile synchronization runs after sign-in and when restoring a Firebase session. A cloud profile failure is surfaced separately and does not incorrectly discard the valid Firebase login.
+- Profile photo removal now deletes the stale Firestore field.
+- Coroutine cancellation is rethrown rather than converted into a generic sign-in error.
+- Firestore error logs no longer include user identifiers, email addresses, document paths or raw exception messages.
+- App Check debug token handling now uses the SDK-managed Debug provider flow instead of writing undocumented SDK SharedPreferences keys.
+- Added unit tests for Firebase-backed session restoration and a GitHub Actions workflow for debug/release builds and JVM unit tests.
+
+### Remaining verification and product work
+
+- The Gradle workflow has been added, but no successful workflow run or local Gradle build is available in this review session. Treat compilation and unit-test status as **unverified** until GitHub Actions reports success.
+- Firebase Emulator rules tests have not been run.
+- Google OAuth package/SHA fingerprints, actual `google-services.json`, Firebase provider enablement, Firestore profile writes and Play Integrity attestation require verification against the real Firebase project.
+- Production App Check enforcement must remain disabled until legitimate release clients pass the Firebase metrics checks.
+- Playback provider viability, playlist track membership, live Library observation, AI DJ canonical track resolution, privacy/deletion policy and release signing remain separate outstanding work items.
