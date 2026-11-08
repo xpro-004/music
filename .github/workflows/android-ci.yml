@@ -3,6 +3,7 @@ name: Android CI
 on:
   pull_request:
     branches: [xrotune-android-app]
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [xrotune-android-app, audit/app-check-play-integrity]
   workflow_dispatch:
