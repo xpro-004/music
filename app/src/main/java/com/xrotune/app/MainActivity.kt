@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
             val repo = app.repository
             return when {
                 modelClass.isAssignableFrom(AuthViewModel::class.java) ->
-                    AuthViewModel(AuthManager(applicationContext), app.sessionStore, repo) as T
+                    AuthViewModel(AuthManager(applicationContext), app.sessionStore, repo, app.firestoreRepository) as T
                 modelClass.isAssignableFrom(HomeViewModel::class.java) ->
                     HomeViewModel(repo) as T
                 modelClass.isAssignableFrom(SearchViewModel::class.java) ->
@@ -114,10 +114,10 @@ class MainActivity : ComponentActivity() {
                     authState.account == null && !authState.isGuest -> SignInScreen(
                         signingIn = authState.signingIn,
                         error = authState.error,
-                        onSignIn = authViewModel::signIn,
+                        onSignIn = { authViewModel.signIn(this@MainActivity) },
                         onSkip = authViewModel::continueAsGuest,
                     )
-                    else -> MainScaffold(factory = factory)
+                    else -> MainScaffold(factory = factory, activity = this@MainActivity)
                 }
             }
         }
@@ -143,6 +143,7 @@ private data class TabItem(val route: String, val label: String, val icon: Image
 @Composable
 private fun MainScaffold(
     factory: ViewModelProvider.Factory,
+    activity: ComponentActivity,
 ) {
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -180,6 +181,10 @@ private fun MainScaffold(
 
     LaunchedEffect(playerState.error) {
         playerState.error?.let { snackbarHostState.showSnackbar(it) }
+    }
+
+    LaunchedEffect(authState.error) {
+        authState.error?.let { snackbarHostState.showSnackbar(it) }
     }
 
     val authViewModel: AuthViewModel = viewModel(factory = factory)
@@ -261,7 +266,7 @@ private fun MainScaffold(
                                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign out")
                             }
                         } else {
-                            androidx.compose.material3.TextButton(onClick = { authViewModel.signIn() }) {
+                            androidx.compose.material3.TextButton(onClick = { authViewModel.signIn(activity) }) {
                                 Text("Sign In", color = MaterialTheme.colorScheme.primary)
                             }
                         }
@@ -334,7 +339,7 @@ private fun MainScaffold(
                     viewModel = vm,
                     onTrackClick = onTrackClick,
                     isSignedIn = authState.account != null,
-                    onSignIn = authViewModel::signIn,
+                    onSignIn = { authViewModel.signIn(activity) },
                 )
             }
             composable("player") {
