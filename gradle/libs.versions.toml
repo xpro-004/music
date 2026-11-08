@@ -46,7 +46,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
-firebase-appcheck-recaptcha = { group = "com.google.firebase", name = "firebase-appcheck-recaptcha" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 json = { group = "org.json", name = "json", version.ref = "json" }
