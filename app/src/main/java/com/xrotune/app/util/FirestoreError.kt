@@ -1,46 +1,21 @@
 package com.xrotune.app.util
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
-import org.json.JSONArray
-import org.json.JSONObject
 
 enum class OperationType(val value: String) {
-    CREATE("create"),
-    UPDATE("update"),
-    DELETE("delete"),
-    LIST("list"),
-    GET("get"),
-    WRITE("write"),
+    CREATE("create"), UPDATE("update"), DELETE("delete"), LIST("list"), GET("get"), WRITE("write"),
 }
 
-fun handleFirestoreError(exception: Exception, operationType: OperationType, path: String?): String {
-    val auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
-
-    val providerInfoList = currentUser?.providerData?.map { provider ->
-        JSONObject().apply {
-            put("providerId", provider.providerId)
-            put("email", provider.email)
-        }
-    } ?: emptyList()
-
-    val authInfoJson = JSONObject().apply {
-        put("userId", currentUser?.uid)
-        put("email", currentUser?.email)
-        put("emailVerified", currentUser?.isEmailVerified)
-        put("tenantId", currentUser?.tenantId)
-        put("providerInfo", JSONArray(providerInfoList))
-    }
-
-    val errorInfoJson = JSONObject().apply {
-        put("error", exception.message ?: exception.toString())
-        put("operationType", operationType.value)
-        put("path", path)
-        put("authInfo", authInfoJson)
-    }
-
-    val jsonString = errorInfoJson.toString()
-    Log.e("FirestoreError", "Firestore Error: $jsonString")
-    return jsonString
+/** Logs operation metadata only; never emit user IDs, emails, document paths or raw payloads. */
+fun handleFirestoreError(
+    exception: Exception,
+    operationType: OperationType,
+    @Suppress("UNUSED_PARAMETER") path: String?,
+): String {
+    val errorCode = (exception as? com.google.firebase.FirebaseException)?.message
+        ?.substringBefore(':')
+        ?.take(80)
+        ?: exception.javaClass.simpleName
+    Log.e("FirestoreError", "Firestore ${operationType.value} failed ($errorCode)")
+    return "Cloud data operation failed. Please try again."
 }
