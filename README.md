@@ -50,7 +50,23 @@ Firebase project configuration or signing keys.
 
 App Check provider initialization happens in `MainActivity.onCreate` before
 the app first accesses Firestore or Firebase AI Logic. Debug builds use the
-Debug provider; release builds use the native Android Play Integrity provider.
+SDK-managed Debug provider (register the token printed in Logcat); release
+builds use the native Android Play Integrity provider.
+
+### Authentication lifecycle
+
+- Google Credential Manager is launched with the foreground Activity.
+- Firebase Authentication is the source of truth for signed-in state after app
+  restarts; cached DataStore account fields are display metadata only.
+- Firebase UID is required before a Google sign-in result is accepted.
+- The Firestore `users/{uid}` profile is synchronized after sign-in and when
+  restoring an existing Firebase session.
+- Guest mode is persisted separately and clears stale cached account fields.
+- Google ID tokens are not copied into DataStore; Firebase Auth manages its
+  own session credentials.
+- A profile-sync failure is reported without treating the Firebase login as
+  signed out.
+
 
 ## Layout
 
@@ -108,5 +124,7 @@ and require the Firebase Emulator Suite plus the Node test dependencies.
   observed state.
 - Google sign-in, Firebase configuration, App Check, and release signing must
   be validated using the actual Firebase project and signing certificate.
+- The CI fallback Firebase config is a non-production placeholder for build
+  compilation only; it cannot authenticate users or validate cloud access.
 - Do not distribute a production APK until licensing, API terms, privacy
   disclosures, and runtime behavior have been reviewed.
