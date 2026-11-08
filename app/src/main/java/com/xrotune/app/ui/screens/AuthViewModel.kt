@@ -114,6 +114,8 @@ class AuthViewModel(
     fun continueAsGuest() {
         viewModelScope.launch {
             try {
+                // A guest session must not leave an older Firebase identity active.
+                authManager.signOut()
                 sessionStore.setGuestMode(true)
                 _state.value = AuthUiState(restoring = false, isGuest = true)
             } catch (e: CancellationException) {
@@ -129,9 +131,9 @@ class AuthViewModel(
             try {
                 authManager.signOut()
                 repository.authHeader = null
-                _state.value = AuthUiState(restoring = false, isGuest = true)
-                sessionStore.clear()
+                // Clear account metadata and persist guest mode in one DataStore transaction.
                 sessionStore.setGuestMode(true)
+                _state.value = AuthUiState(restoring = false, isGuest = true)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
