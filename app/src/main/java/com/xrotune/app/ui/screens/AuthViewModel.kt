@@ -39,20 +39,30 @@ class AuthViewModel(
             try {
                 val restored = resolveAuthSession(authManager.currentAccount(), sessionStore.isGuest.first())
                 if (restored.account != null) {
-                    sessionStore.save(restored.account)
-                    syncProfile(restored.account)
+                    _state.value = AuthUiState(account = restored.account, restoring = false)
+                    try {
+                        sessionStore.save(restored.account)
+                        syncProfile(restored.account)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(
+                            error = "You are signed in, but your cloud profile could not sync. Check your connection and retry.",
+                        )
+                    }
                 } else {
                     sessionStore.clearAccount()
+                    _state.value = AuthUiState(isGuest = restored.isGuest, restoring = false)
                 }
-                _state.value = AuthUiState(
-                    account = restored.account,
-                    isGuest = restored.isGuest,
-                    restoring = false,
-                )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = AuthUiState(restoring = false, error = "Could not restore your session. Please sign in again.")
+                val firebaseAccount = authManager.currentAccount()
+                _state.value = AuthUiState(
+                    account = firebaseAccount,
+                    restoring = false,
+                    error = "Session restore was incomplete. Your Firebase sign-in is preserved; please retry sync.",
+                )
             }
         }
     }
@@ -64,8 +74,8 @@ class AuthViewModel(
             try {
                 when (val result = authManager.signIn(activity)) {
                     is SignInResult.Success -> {
-                        sessionStore.save(result.account)
                         _state.value = _state.value.copy(account = result.account, isGuest = false)
+                        sessionStore.save(result.account)
                         try {
                             syncProfile(result.account)
                         } catch (e: CancellationException) {
@@ -82,7 +92,9 @@ class AuthViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = "Sign-in could not be completed. Please try again.")
+                _state.value = _state.value.copy(
+                    error = "Sign-in could not be completed. Please try again.",
+                )
             } finally {
                 _state.value = _state.value.copy(signingIn = false)
             }
@@ -117,13 +129,15 @@ class AuthViewModel(
             try {
                 authManager.signOut()
                 repository.authHeader = null
+                _state.value = AuthUiState(restoring = false, isGuest = true)
                 sessionStore.clear()
                 sessionStore.setGuestMode(true)
-                _state.value = AuthUiState(restoring = false, isGuest = true)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = "Sign-out could not be completed. Please try again.")
+                _state.value = _state.value.copy(
+                    error = "You have been signed out of Firebase, but local session cleanup failed. Restart the app.",
+                )
             }
         }
     }
