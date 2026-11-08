@@ -59,7 +59,7 @@ class AuthManager(private val appContext: Context) {
 
             val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
             val token = googleCredential.idToken
-            if (token.isBlank()) return SignInResult.Failure("Google Sign-In returned an empty ID token.")
+            if (token.isNullOrBlank()) return SignInResult.Failure("Google Sign-In returned an empty ID token.")
 
             val firebaseUser = FirebaseAuth.getInstance()
                 .signInWithCredential(GoogleAuthProvider.getCredential(token, null))
