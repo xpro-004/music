@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.remove
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +21,8 @@ class SessionStore(private val context: Context) {
         val email = stringPreferencesKey("account_email")
         val photo = stringPreferencesKey("account_photo")
         val guest = booleanPreferencesKey("guest_mode")
+        // Remove the token persisted by older app versions; Firebase owns auth credentials.
+        val legacyGoogleToken = stringPreferencesKey("account_token")
     }
 
     val isGuest: Flow<Boolean> = context.dataStore.data.map { it[Keys.guest] ?: false }
@@ -56,6 +57,7 @@ class SessionStore(private val context: Context) {
         prefs.remove(Keys.name)
         prefs.remove(Keys.email)
         prefs.remove(Keys.photo)
+        prefs.remove(Keys.legacyGoogleToken)
     }
 
     private fun putOrRemove(prefs: MutablePreferences, key: Preferences.Key<String>, value: String?) {
