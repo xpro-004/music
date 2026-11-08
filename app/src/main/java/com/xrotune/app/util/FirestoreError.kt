@@ -12,10 +12,6 @@ fun handleFirestoreError(
     operationType: OperationType,
     @Suppress("UNUSED_PARAMETER") path: String?,
 ): String {
-    val errorCode = (exception as? com.google.firebase.FirebaseException)?.message
-        ?.substringBefore(':')
-        ?.take(80)
-        ?: exception.javaClass.simpleName
-    Log.e("FirestoreError", "Firestore ${operationType.value} failed ($errorCode)")
+    Log.e("FirestoreError", "Firestore ${operationType.value} failed (${exception.javaClass.simpleName})")
     return "Cloud data operation failed. Please try again."
 }
